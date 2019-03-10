@@ -13,9 +13,10 @@ class Main:
         self.between= []
         self.inter = {}
         self.to_dict = {}
-        self.from_dict = {}
+        self.to_dict = {}
         self.least_distance = [10000000000,0]
         self.cum_distance =0
+        self.more = False
 
     def openFiles(self):
         cwd = getcwd()
@@ -339,26 +340,63 @@ class Main:
         self.dRFlight(source_set=s_to, destination_set=d_from)
 
         del inter
+        if self.between:
+            return
 
-        if not(self.between):
-            for i in s_to:
-                for j in d_from:
+        else:
+            self.more = True
+            self.s_to = s_to
+            self.d_from = d_from
+            self.More()
+            return
+
+    def More(self):
+        if len(self.s_to)>= len(self.d_from):
+            for i in self.s_to:
+                for j in self.d_from:
                     if len(self.journey_to)>1 and len(self.journey_from)>1:
                         self.journey_to.pop()
                         self.journey_from.pop(0)
-
                     self.routing(source=i, destination=j)
+
+        else:
+            for i in self.d_from:
+                for j in self.s_to:
+                    if len(self.journey_to)>1 and len(self.journey_from)>1:
+                        self.journey_to.pop()
+                        self.journey_from.pop(0)
+                    self.routing(source=j, destination=i)
 
         return
 
-
     def Optimizer(self):
 
-        if len(self.inter)>1:
+        if self.more :
+
+            if len(self.inter) > 1:
+                for i in self.inter:
+                    before = self.to_dict[self.journey_to[-1]][i][1]
+                    after = self.to_dict[self.journey_from[0]][i][2]
+                    self.cum_distance = self.to_dict[self.journey_to[0]][before][4]+self.to_dict[self.journey_to[-1]][i][4] + \
+                                        self.to_dict[self.journey_from[0]][i][4] +self.to_dict[self.journey_to[-1]][after][4]
+
+                    self.comparator(i)
+
+            elif len(self.between) > 1:
+                for i in self.between:
+                    before = self.to_dict[self.journey_to[-1]][i[1]][1]
+                    after = self.to_dict[self.journey_from[0]][i[2]][2]
+                    self.cum_distance = self.to_dict[self.journey_to[0]][before][4]+ self.to_dict[self.journey_to[-1]][i[1]][4] + i[4] + \
+                                        self.to_dict[self.journey_from[0]][i[2]][4] + self.to_dict[self.journey_from[0]][after][4]
+
+                    self.comparator(i)
+            return
+
+        elif len(self.inter)>1:
 
             for i in self.inter:
 
-                self.cum_distance = self.to_dict[self.journey_to[0]][i][4] +self.from_dict[self.journey_from[-1]][i][4]
+                self.cum_distance = self.to_dict[self.journey_to[0]][i][4] +self.to_dict[self.journey_from[-1]][i][4]
 
                 self.comparator(i)
 
@@ -367,6 +405,9 @@ class Main:
 
                 self.cum_distance = self.to_dict[self.journey_to[0]][i[1]][4] + i[4] + self.to_dict[self.journey_from[-1]][i[2]][4]
                 self.comparator(i)
+
+        return
+
 
 
     def Writing(self):
@@ -380,6 +421,120 @@ class Main:
                 sol.write('Optimality criteria: flights')
                 return
 
+            if self.more:
+
+                if self.inter:
+
+                    if len(self.inter)==1:
+
+
+                        i = list(self.inter)[0]
+                        before = self.to_dict[self.journey_to[-1]][i][1]
+                        after = self.to_dict[self.journey_from[0]][i][2]
+
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][after])
+
+                        stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
+                                            int(self.to_dict[self.journey_to[-1]][i][3]) + \
+                                            int(self.to_dict[self.journey_from[0]][i][3]) + \
+                                            int(self.to_dict[self.journey_to[-1]][after][3])
+
+                        self.cum_distance = self.cum_distance = self.to_dict[self.journey_to[0]][before][4] + \
+                                            self.to_dict[self.journey_to[-1]][i][4] + \
+                                            self.to_dict[self.journey_from[0]][i][4] + \
+                                            self.to_dict[self.journey_to[-1]][after][4]
+
+
+                        sol.write('Total flights: 4\n')
+                        sol.write('Total additional stops: ' + str(stops) + '\n')
+                        sol.write('Total distance: ' + str(self.cum_distance) + 'km\n')
+                        sol.write('Optimality criteria: flights')
+
+                        return
+
+                    i = self.least_distance[1]
+                    before = self.to_dict[self.journey_to[-1]][i][1]
+                    after = self.to_dict[self.journey_from[0]][i][2]
+
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][after])
+
+                    stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
+                            int(self.to_dict[self.journey_to[-1]][i][3]) + \
+                            int(self.to_dict[self.journey_from[0]][i][3]) + \
+                            int(self.to_dict[self.journey_to[-1]][after][3])
+
+                    sol.write('Total flights: 4\n')
+                    sol.write('Total additional stops: ' + str(stops) + '\n')
+                    sol.write('Total distance: ' + str(self.least_distance[0]) + 'km\n')
+                    sol.write('Optimality criteria: distance')
+
+                    return
+
+                elif self.between:
+
+                    if len(self.between) == 1:
+                        i = self.between[0]
+
+                        before = self.to_dict[self.journey_to[-1]][i[1]][1]
+                        after = self.to_dict[self.journey_from[0]][i[2]][2]
+
+
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i[1]])
+
+                        self.WriteLine(file=sol, info=i)
+
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i[2]])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][after])
+
+                        stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
+                                            int(self.to_dict[self.journey_to[-1]][i[1]][3]) + int(i[3]) + \
+                                            int(self.to_dict[self.journey_from[0]][i[2]][3]) + \
+                                            int(self.to_dict[self.journey_from[0]][after][3])
+
+                        self.cum_distance = self.to_dict[self.journey_to[0]][before][4] + \
+                                            self.to_dict[self.journey_to[-1]][i[1]][4] + i[4] + \
+                                            self.to_dict[self.journey_from[0]][i[2]][4] + \
+                                            self.to_dict[self.journey_from[0]][after][4]
+
+                        sol.write('Total flights: 5\n')
+                        sol.write('Total additional stops: ' + str(stops) + '\n')
+                        sol.write('Total distance: ' + str(self.cum_distance) + 'km\n')
+                        sol.write('Optimality criteria: flights')
+
+                        return
+
+                    i = self.least_distance[1]
+
+                    before = self.to_dict[self.journey_to[-1]][i[1]][1]
+                    after = self.to_dict[self.journey_from[0]][i[2]][2]
+
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i[1]])
+
+                    self.WriteLine(file=sol, info=i)
+
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i[2]])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][after])
+
+                    stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
+                            int(self.to_dict[self.journey_to[-1]][i[1]][3]) + int(i[3]) + \
+                            int(self.to_dict[self.journey_from[0]][i[2]][3]) + \
+                            int(self.to_dict[self.journey_from[0]][after][3])
+
+
+                    sol.write('Total flights: 5\n')
+                    sol.write('Total additional stops: ' + str(stops) + '\n')
+                    sol.write('Total distance: ' + str(self.least_distance[0]) + 'km\n')
+                    sol.write('Optimality criteria: flights')
+
+                    return
 
 
             elif self.inter:
@@ -389,13 +544,13 @@ class Main:
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i])
 
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i])
-                    stops = int(self.to_dict[self.journey_to[0]][i][3]) + int(self.from_dict[self.journey_from[-1]][i][3])
+                    stops = int(self.to_dict[self.journey_to[0]][i][3]) + int(self.to_dict[self.journey_from[-1]][i][3])
 
-                    self.cum_distance = self.to_dict[self.journey_to[0]][i][4]+self.from_dict[self.journey_from[-1]][i][4]
+                    self.cum_distance = self.to_dict[self.journey_to[0]][i][4]+self.to_dict[self.journey_from[-1]][i][4]
 
 
                     sol.write('Total flights: 2\n')
-                    sol.write('Total additional stops: ' + str(stops) + '\n\n')
+                    sol.write('Total additional stops: ' + str(stops) + '\n')
                     sol.write('Total distance: ' + str(self.cum_distance) + 'km\n')
                     sol.write('Optimality criteria: flights')
 
@@ -405,7 +560,7 @@ class Main:
                 self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i])
 
                 self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i])
-                stops = int(self.to_dict[self.journey_to[0]][i][3]) + int(self.from_dict[self.journey_from[-1]][i][3])
+                stops = int(self.to_dict[self.journey_to[0]][i][3]) + int(self.to_dict[self.journey_from[-1]][i][3])
 
                 sol.write('Total flights: 2\n')
                 sol.write('Total additional stops: ' + str(stops) + '\n\n')
@@ -418,7 +573,7 @@ class Main:
             elif self.between:
 
                 if len(self.between)==1:
-                    i=self.between
+                    i=self.between[0]
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i[1]])
 
                     self.WriteLine(file=sol, info=i)
@@ -452,6 +607,9 @@ class Main:
                 sol.write('Total distance: ' + str(self.least_distance[0]) + 'km\n')
                 sol.write('Optimality criteria: distance')
                 return
+
+            else:
+                sol.write("Unsupported request")
 
 
     def WriteLine(self, file, info):
