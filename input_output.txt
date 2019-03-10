@@ -1,0 +1,5 @@
+5G from ACC to KMS 0 stops
+Total flights: 1
+Total additional stops: 0
+Total distance: 200km
+Optimality criteria: flights
