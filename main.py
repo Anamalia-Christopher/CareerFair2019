@@ -42,7 +42,7 @@ class Main:
                     source.add(row[2])
                     destination.add(row[4])
 
-            routable = source.union(destination)
+            routable = source.intersection(destination)
 
         with open(cwd + '/data/airports.csv', 'r') as data:
             self.airport = []
@@ -55,7 +55,6 @@ class Main:
                     self.IATA_airport.append(row[4])
                     self.city.append(row[2])
 
-
         with open(cwd +'/'+ argv[-1],  'r') as data:
             self.input = [ i.strip().split(', ') for i in data.readlines()]
 
@@ -65,10 +64,11 @@ class Main:
 
     def inputCodes(self):
         self.input_codes = {}
-
-        self.input_codes['source'] = self.IATA_airport[self.city.index(self.input[0][0])]
-        self.input_codes['destination'] = self.IATA_airport[self.city.index(self.input[1][0])]
-
+        try:
+            self.input_codes['source'] = self.IATA_airport[self.city.index(self.input[0][0])]
+            self.input_codes['destination'] = self.IATA_airport[self.city.index(self.input[1][0])]
+        except ValueError:
+            self.Unsupported()
         del self.city
 
         print(self.input_codes)
@@ -77,7 +77,6 @@ class Main:
 
 
     def directFlight(self, source, destination):
-        quarter_length = int(len(self.routes)/4)
         self.direct_l = []
 
         cor1 = self.coor(source)
@@ -95,14 +94,13 @@ class Main:
         except ValueError:return
 
     def dRFlight(self, source_set, destination_set):
-        quarter_length = round(len(self.routes)/4)
-        l_s = len(source_set)
-        l_d = len(destination_set)
-        check =[]
-        # todo: check whether we still need check
+
         if len(source_set) >= len(destination_set):
+
             for source in source_set:
+
                 for destination in destination_set:
+
                     try:
                         i = self.s_d.index([source, destination])
 
@@ -112,25 +110,26 @@ class Main:
                         self.routes[i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
 
                         self.between.append(self.routes[i])
-                        print(self.routes[i])
-                        break
-                    except ValueError:return
+
+                    except ValueError:pass
+            return
+
 
         elif len(source_set) <= len(destination_set):
-                    for destination in source_set:
-                        for source in destination_set:
-                            try:
-                                i = self.s_d.index([source, destination])
+            for destination in destination_set:
+                for source in source_set:
+                    try:
+                        i = self.s_d.index([source, destination])
 
-                                cor1 = self.coor(source)
-                                cor2 = self.coor(destination)
+                        cor1 = self.coor(source)
+                        cor2 = self.coor(destination)
 
-                                self.routes[i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
+                        self.routes[i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
 
-                                self.between.append(self.routes[i])
-                                print(self.routes[i])
-                                break
-                            except ValueError:return
+                        self.between.append(self.routes[i])
+
+
+                    except ValueError:return
 
 
         return
@@ -144,53 +143,21 @@ class Main:
         self.to_dict.setdefault(destination, {})
         s_to = set()
         d_from = set()
-        quarter_length = int(len(self.routes)/4)
+
         cor1 = self.coor(source)
         cor3 = self.coor(destination)
 
-        for i in range(quarter_length):
+        for i in range(len(self.s_d)):
+            if self.s_d[i][0] == source and self.s_d[i][1] in self.IATA_airport:
 
-            if self.routes[i][1] == source and (self.routes[i][0] in self.airline):
                 s_to.add(self.routes[i][2])
-
                 cor2 = self.coor(self.routes[i][2])
 
                 self.routes[i].append(self.Harversine_f(lat1=cor1[0], lon1=cor1[1], lat2=cor2[0], lon2=cor2[1]))
 
 
-                self.to_dict[source][self.routes[i][2]]= self.routes[i]
-
-            if self.routes[quarter_length+i][1] == source and (self.routes[quarter_length+i][0] in self.airline):
-                s_to.add(self.routes[quarter_length+i][2])
-
-                cor2 = self.coor(self.routes[quarter_length+i][2])
-
-
-                self.routes[quarter_length+i].append(self.Harversine_f(lat1=cor1[0], lon1=cor1[1], lat2=cor2[0], lon2=cor2[1]))
-
-                self.to_dict[source][self.routes[quarter_length+i][2]] = self.routes[quarter_length+i]
-
-            if self.routes[2*quarter_length+i][1] == source and (self.routes[2*quarter_length+i][0] in self.airline):
-                s_to.add(self.routes[2*quarter_length+i][2])
-
-                cor2 = self.coor(self.routes[2*quarter_length + i][2])
-
-                self.routes[2*quarter_length + i].append(self.Harversine_f(lat1=cor1[0], lon1=cor1[1], lat2=cor2[0], lon2=cor2[1]))
-
-                self.to_dict[source][self.routes[2*quarter_length+i][2]] = self.routes[2*quarter_length+i]
-
-            if self.routes[3*quarter_length+i][1] == source and (self.routes[3*quarter_length+i][0] in self.airline):
-                s_to.add(self.routes[3*quarter_length+i][2])
-
-                cor2 = self.coor(self.routes[3*quarter_length + i][2])
-
-                self.routes[3*quarter_length + i].append(self.Harversine_f(lat1=cor1[0], lon1=cor1[1], lat2=cor2[0], lon2=cor2[1]))
-
-                self.to_dict[source][self.routes[3*quarter_length+i][2]] = self.routes[3*quarter_length+i]
-
-
-
-            if self.routes[i][2] == destination and (self.routes[i][0] in self.airline):
+                self.to_dict[source][self.routes[i][2]] = self.routes[i]
+            if self.s_d[i][1] == destination and self.s_d[i][0] in self.IATA_airport:
                 d_from.add(self.routes[i][1])
 
                 cor2 = self.coor(self.routes[i][1])
@@ -198,42 +165,6 @@ class Main:
                 self.routes[i].append(self.Harversine_f(lat1=cor3[0], lon1=cor3[1], lat2=cor2[0], lon2=cor2[1]))
 
                 self.to_dict[destination][self.routes[i][1]] = self.routes[i]
-
-
-            if self.routes[quarter_length+i][2] == destination and (self.routes[quarter_length+i][0] in self.airline):
-                d_from.add(self.routes[quarter_length+i][1])
-
-                cor2 = self.coor(self.routes[quarter_length+i][1])
-
-                self.routes[quarter_length+i].append(self.Harversine_f(lat1=cor3[0], lon1=cor3[1], lat2=cor2[0], lon2=cor2[1]))
-
-
-                self.to_dict[destination][self.routes[quarter_length+i][1]] = self.routes[quarter_length+i]
-
-
-            if self.routes[2*quarter_length+i][2] == destination and (self.routes[2*quarter_length+i][0] in self.airline):
-                d_from.add(self.routes[2*quarter_length+i][1])
-
-                cor2 = self.coor(self.routes[2*quarter_length+i][1])
-
-                self.routes[2* quarter_length+i].append(self.Harversine_f(lat1=cor3[0], lon1=cor3[1], lat2=cor2[0], lon2=cor2[1]))
-
-
-                self.to_dict[destination][self.routes[2*quarter_length+i][1]] = self.routes[2*quarter_length+i]
-
-
-            if self.routes[3*quarter_length+i][2] == destination and (self.routes[3*quarter_length+i][0] in self.airline):
-                d_from.add(self.routes[3*quarter_length+i][1])
-
-                cor2 = self.coor(self.routes[3*quarter_length+i][1])
-
-
-                self.routes[3 * quarter_length+i].append(self.Harversine_f(lat1=cor3[0], lon1=cor3[1], lat2=cor2[0], lon2=cor2[1]))
-
-
-                self.to_dict[destination][self.routes[3*quarter_length+i][1]] = self.routes[3*quarter_length+i]
-
-
 
         inter = s_to.intersection(d_from)
         if inter:
@@ -324,7 +255,7 @@ class Main:
                 sol.write('Optimality criteria: flights')
                 return
 
-            if self.more:
+            elif self.more:
 
                 if self.inter:
 
@@ -466,7 +397,7 @@ class Main:
                 stops = int(self.to_dict[self.journey_to[0]][i][3]) + int(self.to_dict[self.journey_from[-1]][i][3])
 
                 sol.write('Total flights: 2\n')
-                sol.write('Total additional stops: ' + str(stops) + '\n\n')
+                sol.write('Total additional stops: ' + str(stops) + '\n')
                 sol.write('Total distance: ' + str(self.least_distance[0]) + 'km\n')
                 sol.write('Optimality criteria: distance')
 
@@ -506,14 +437,20 @@ class Main:
 
 
                 sol.write('Total flights: 3\n')
-                sol.write('Total additional stops: ' + str(stops) + '\n\n')
+                sol.write('Total additional stops: ' + str(stops) + '\n')
                 sol.write('Total distance: ' + str(self.least_distance[0]) + 'km\n')
                 sol.write('Optimality criteria: distance')
                 return
 
             else:
-                sol.write("Unsupported request")
+                return sol.write("Unsupported request")
+            return
 
+    def Unsupported(self):
+        with open(getcwd() + '/' + argv[-1][:-4:] + '_output.txt', 'w+') as sol:
+            sol.write("Unsupported request")
+
+        exit()
 
     def WriteLine(self, file, info):
         return file.write(info[0] + ' from ' + info[1] + ' to ' + info[2] + ' ' + info[3] + ' stops\n')
@@ -528,13 +465,15 @@ class Main:
             return
 
         self.routing(source=self.input_codes['source'], destination=self.input_codes['destination'])
-
+        if not(self.inter or self.between):
+            self.More()
         self.Optimizer()
         self.Writing()
         return
 
     def coor(self, IATA):
         return float(self.airport[self.IATA_airport.index(IATA)][3]), float(self.airport[self.IATA_airport.index(IATA)][4])
+
 
 
     def Harversine_f(self, lat1, lon1,lat2, lon2):
@@ -544,7 +483,6 @@ class Main:
         return d
 
     def comparator(self, keyword):
-
         if self.cum_distance<self.least_distance[0]:
             self.least_distance[0] = self.cum_distance
             self.least_distance[1] = keyword
