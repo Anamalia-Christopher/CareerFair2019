@@ -13,7 +13,6 @@ class Main:
         self.between= []
         self.inter = {}
         self.to_dict = {}
-        self.to_dict = {}
         self.least_distance = [10000000000,0]
         self.cum_distance =0
         self.more = False
@@ -27,21 +26,34 @@ class Main:
                 if row[3] and row[7] == 'Y':
                     self.airline.append(row[3])
 
+        with open(cwd + '/data/routes.csv', 'r') as data:
+            self.routes = []
+            self.s_d = []
+            source = set()
+            destination = set()
+            l = set(self.airline[:])
+
+            for row in csv.reader(data):
+                # 0 - airline code 2- source airport code 4 - destination airport code 7- stops
+
+                if row[1] != '\\N' and l.intersection({row[0]}):
+                    self.routes.append([row[0],row[2], row[4], row[7]])
+                    self.s_d.append([row[2], row[4]])
+                    source.add(row[2])
+                    destination.add(row[4])
+
+            routable = source.union(destination)
+
         with open(cwd + '/data/airports.csv', 'r') as data:
             self.airport = []
             self.IATA_airport = []
+            self.city = []
             for row in csv.reader(data):
                 # 2-city 3- country 4- IATA code 6-latitude 7-longitude
-                if not (row[4] == '\\N'):
+                if not (row[4] == '\\N') and routable.intersection({row[4]}):
                     self.airport.append([row[2],row[3], row[4], row[6],row[7]])
                     self.IATA_airport.append(row[4])
-
-        with open(cwd + '/data/routes.csv', 'r') as data:
-            self.routes = []
-            for row in csv.reader(data):
-                # 0 - airline code 2- source airport code 4 - destination airport code 7- stops
-                if row[1] != '\\N':
-                    self.routes.append([row[0],row[2], row[4], row[7]])
+                    self.city.append(row[2])
 
 
         with open(cwd +'/'+ argv[-1],  'r') as data:
@@ -50,34 +62,20 @@ class Main:
 
         return
 
+
     def inputCodes(self):
         self.input_codes = {}
-        half_length = int(len(self.airport)/2)
-        for i in range(half_length):
 
-            if self.input[0][1]==self.airport[i][1] and self.input[0][0]==self.airport[i][0]:
-                self.input_codes['source']= self.airport[i][2]
-                if len(self.input_codes) == 2:
-                    break
+        self.input_codes['source'] = self.IATA_airport[self.city.index(self.input[0][0])]
+        self.input_codes['destination'] = self.IATA_airport[self.city.index(self.input[1][0])]
 
-            if self.input[1][1]==self.airport[i][1] and self.input[1][0]==self.airport[i][0]:
-                self.input_codes['destination'] = self.airport[i][2]
-                if len(self.input_codes) == 2:
-                    break
-            if self.input[0][1]==self.airport[half_length+i][1] and self.input[0][0]==self.airport[half_length+i][0]:
-                self.input_codes['source']= self.airport[half_length+i][2]
-                if len(self.input_codes) == 2:
-                    break
-
-            if self.input[1][1]==self.airport[half_length+i][1] and self.input[1][0]==self.airport[half_length+i][0]:
-                self.input_codes['destination'] = self.airport[half_length+i][2]
-                if len(self.input_codes) == 2:
-                    break
+        del self.city
 
         print(self.input_codes)
 
+        return
 
-    # todo: do for direct flight
+
     def directFlight(self, source, destination):
         quarter_length = int(len(self.routes)/4)
         self.direct_l = []
@@ -88,146 +86,51 @@ class Main:
 
         distance = self.Harversine_f(lat1=cor1[0], lon1=cor1[1], lat2=cor2[0], lon2=cor2[1])
 
-        for i in range(quarter_length):
-
-            if self.routes[i][1] == source and self.routes[i][2] == destination and (self.routes[i][0] in self.airline):
-                self.routes[i].append(distance)
-                self.direct_l = self.routes[i]
-                return
-
-            if self.routes[quarter_length + i][1] == source and self.routes[quarter_length + i][2] == destination and (self.routes[quarter_length + i][0] in self.airline):
-
-                self.routes[quarter_length+i].append(distance)
-                self.direct_l = self.routes[quarter_length + i]
-                return
-
-            if self.routes[2 * quarter_length + i][1] == source and self.routes[2 * quarter_length + i][2] == destination and (
-                    self.routes[2 * quarter_length + i][0] in self.airline):
-
-                self.routes[2*quarter_length+i].append(distance)
-                self.direct_l = self.routes[2 * quarter_length + i]
-                return
-
-            if self.routes[3 * quarter_length + i][1] == source and self.routes[3 * quarter_length + i][2] == destination and (
-                    self.routes[3 * quarter_length + i][0] in self.airline):
-
-                self.routes[3*quarter_length+i].append(distance)
-                self.direct_l = self.routes[3 * quarter_length + i]
-                return
-
-
-        return
+        try:
+            i = self.s_d.index([source, destination])
+            self.routes[i].append(distance)
+            self.direct_l = self.routes[i]
+            print(self.direct_l)
+            return
+        except ValueError:return
 
     def dRFlight(self, source_set, destination_set):
         quarter_length = round(len(self.routes)/4)
         l_s = len(source_set)
         l_d = len(destination_set)
         check =[]
-        for i in range(quarter_length):
-            if l_s>= l_d:
-                for source in source_set:
-
-                    if self.routes[i][1] == source and self.routes[i][2] in destination_set and (self.routes[i][0] in self.airline) and [self.routes[i][1],self.routes[i][2]] not in  check:
-
-                        cor1 = self.coor(source)
-                        cor2 = self.coor(self.routes[i][2])
-
-                        self.routes[i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
-
-                        self.between.append(self.routes[i])
-                        check.append([self.routes[i][1],self.routes[i][2]])
-                        break
-
-                    if self.routes[quarter_length + i][1] == source and self.routes[quarter_length + i][2] in destination_set and (self.routes[quarter_length + i][0] in self.airline) and [self.routes[quarter_length + i][1],self.routes[quarter_length + i][2]] not in check:
-
-
-                        cor1 = self.coor(source)
-                        cor2 = self.coor(self.routes[quarter_length+i][2])
-
-                        self.routes[quarter_length+i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
-
-                        self.between.append(self.routes[quarter_length + i])
-
-                        check.append([self.routes[quarter_length + i][1],self.routes[quarter_length + i][2]])
-                        break
-
-                    if self.routes[2 * quarter_length + i][1] == source and self.routes[2 * quarter_length + i][2] in destination_set and (self.routes[2 * quarter_length + i][0] in self.airline) and [self.routes[2 * quarter_length + i][1],self.routes[2 * quarter_length + i][2]] not in check:
-
-                        cor1 = self.coor(source)
-                        cor2 = self.coor(self.routes[2*quarter_length+i][2])
-
-                        self.routes[2*quarter_length+i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
-
-                        self.between.append(self.routes[2 * quarter_length + i])
-                        check.append([self.routes[2 * quarter_length + i][1],self.routes[2 * quarter_length + i][2]])
-                        break
-
-                    if self.routes[3 * quarter_length + i][1] == source and self.routes[3 * quarter_length + i][2] in destination_set and (
-                            self.routes[3 * quarter_length + i][0] in self.airline) and [self.routes[3 * quarter_length + i][1], self.routes[3 * quarter_length + i][2]] not in check:
-
-                        cor1 = self.coor(source)
-                        cor2 = self.coor(self.routes[3*quarter_length+i][2])
-
-                        self.routes[3*quarter_length+i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
-
-                        self.between.append(self.routes[3 * quarter_length + i])
-
-                        check.append([self.routes[3 * quarter_length + i][1], self.routes[3 * quarter_length + i][2]])
-
-                        break
-
-            else:
+        # todo: check whether we still need check
+        if len(source_set) >= len(destination_set):
+            for source in source_set:
                 for destination in destination_set:
+                    try:
+                        i = self.s_d.index([source, destination])
 
-                    if self.routes[i][2] == destination and self.routes[i][1] in source_set and (
-                            self.routes[i][0] in self.airline) and [self.routes[i][1],self.routes[i][2]] not in  check:
-
-                        cor1 = self.coor(self.routes[i][1])
+                        cor1 = self.coor(source)
                         cor2 = self.coor(destination)
 
                         self.routes[i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
 
                         self.between.append(self.routes[i])
-
-                        check.append([self.routes[i][1], self.routes[i][2]])
-
+                        print(self.routes[i])
                         break
-                    if self.routes[quarter_length + i][2] == destination and self.routes[quarter_length + i][1] in source_set and (self.routes[quarter_length + i][0] in self.airline) and [self.routes[quarter_length + i][1],self.routes[quarter_length + i][2]] not in check:
+                    except ValueError:return
 
-                        cor1 = self.coor(self.routes[quarter_length + i][1])
-                        cor2 = self.coor(destination)
+        elif len(source_set) <= len(destination_set):
+                    for destination in source_set:
+                        for source in destination_set:
+                            try:
+                                i = self.s_d.index([source, destination])
 
-                        self.routes[quarter_length+i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
+                                cor1 = self.coor(source)
+                                cor2 = self.coor(destination)
 
-                        self.between.append(self.routes[quarter_length + i])
-                        check.append([self.routes[quarter_length + i][1],self.routes[quarter_length + i][2]])
+                                self.routes[i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
 
-                        break
-
-                    if self.routes[2 * quarter_length + i][2] == destination and self.routes[2 * quarter_length + i][1] in source_set and (
-                            self.routes[2 * quarter_length + i][0] in self.airline) and [self.routes[2 * quarter_length + i][1],self.routes[2 * quarter_length + i][2]] not in check:
-
-                        cor1 = self.coor(self.routes[2*quarter_length + i][1])
-                        cor2 = self.coor(destination)
-
-                        self.routes[2*quarter_length+i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
-
-                        self.between.append(self.routes[2 * quarter_length + i])
-                        check.append([self.routes[2 * quarter_length + i][1],self.routes[2 * quarter_length + i][2]])
-
-                        break
-
-                    if self.routes[3 * quarter_length + i][2] == destination and self.routes[3 * quarter_length + i][1] in source_set and (
-                            self.routes[3 * quarter_length + i][0] in self.airline)  and [self.routes[3 * quarter_length + i][1], self.routes[3 * quarter_length + i][2]] not in check:
-                        cor1 = self.coor(self.routes[3 * quarter_length + i][1])
-                        cor2 = self.coor(destination)
-
-                        self.routes[3*quarter_length+i].append(self.Harversine_f(cor1[0], cor1[1], cor2[0], cor2[1]))
-
-                        self.between.append(self.routes[3 * quarter_length + i])
-                        check.append([self.routes[3 * quarter_length + i][1], self.routes[3 * quarter_length + i][2]])
-
-                        break
+                                self.between.append(self.routes[i])
+                                print(self.routes[i])
+                                break
+                            except ValueError:return
 
 
         return
@@ -625,6 +528,7 @@ class Main:
             return
 
         self.routing(source=self.input_codes['source'], destination=self.input_codes['destination'])
+
         self.Optimizer()
         self.Writing()
         return
@@ -648,7 +552,6 @@ class Main:
         return
 
     def BinarySearch(self, data, search):
-        data = sorted(data)
         start = 0
         end = len(data) - 1
         while start <= end:
