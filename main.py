@@ -4,9 +4,20 @@ from sys import argv
 from datetime import datetime
 from math import asin, radians, cos, sqrt, sin, ceil
 
-
+# the logic used in this program is that airplanes leaving a source and airplanes arriving
+# have something in common from intermediate flights if applicable
 class Main:
 
+    # initalizing the class variables
+    # journey_to - keeps places left towards the destination from source
+    # journey_from - keeps places left towards the source from destination
+    # between - keep journey between source and destination
+    # inter - keeps similar places in common between source and destination journeys
+    # to_dict - all journeys leaving the source and destination
+    # least_distance - [0]=least distance between source and destination(initialised with a really big value
+    #                  [1] = information used to get what journey have the least distance
+    # cum_distance - cumulative distance for different paths
+    # more - Becomes true if more that 3 flights takes one to a destination
     def __init__(self):
         self.journey_to = []
         self.journey_from = []
@@ -17,14 +28,24 @@ class Main:
         self.cum_distance =0
         self.more = False
 
+    # Reads the necessary files and stores them in local variables
     def openFiles(self):
+
+        # current working dir
         cwd = getcwd()
+
+        # Reads airline data.
+        # Excludes airlines with no airline ID since they are not used in routes
+        # Excludes airlines that are not active
         with open(cwd + '/data/airlines.csv', 'r') as data:
             self.airline = []
             for row in csv.reader(data):
                 # 3 - IATA code 7- active
                 if row[3] and row[7] == 'Y':
                     self.airline.append(row[3])
+
+        # Reads routes data and excludes all flights whose airlines do not exist,
+        # whose airlines are defective, and with no Airline ID
 
         with open(cwd + '/data/routes.csv', 'r') as data:
             self.routes = []
@@ -42,8 +63,11 @@ class Main:
                     source.add(row[2])
                     destination.add(row[4])
 
-            routable = source.intersection(destination)
+            routable = source.union(destination)
 
+
+        # Reads airport data. Excludes airports with no IATA code
+        # Excludes airports that are not routed to to reduce data length.
         with open(cwd + '/data/airports.csv', 'r') as data:
             self.airport = []
             self.IATA_airport = []
@@ -55,13 +79,15 @@ class Main:
                     self.IATA_airport.append(row[4])
                     self.city.append(row[2])
 
+        # Reads the input file into self.input list
         with open(cwd +'/'+ argv[-1],  'r') as data:
             self.input = [ i.strip().split(', ') for i in data.readlines()]
 
 
         return
 
-
+    # Gets the IATA codes for the given location in the input.
+    # Writes 'unsupported request' in file if it doesnt exist
     def inputCodes(self):
         self.input_codes = {}
         try:
@@ -75,7 +101,7 @@ class Main:
 
         return
 
-
+    # Checks if there is a direct flight to the destination
     def directFlight(self, source, destination):
         self.direct_l = []
 
@@ -93,7 +119,8 @@ class Main:
             return
         except ValueError:return
 
-
+    # checks if the is a direct flight between any of the flights leaving source and flying to destination
+    # it uses data from self.routing method
     def dRFlight(self, source_set, destination_set):
         l=len(self.s_d)
         quarter_length = ceil(l/4)
@@ -149,7 +176,9 @@ class Main:
 
         return
 
-
+    # checks for fights avaliable to a destination.
+    # does this by first checking all flights leaving and arriving the source and destination
+    # it then implements self.dRFlight,  self.More and set intersection to find the right flight.
     def routing(self, source, destination):
 
         self.journey_to.append(source)
@@ -205,6 +234,8 @@ class Main:
             return self.More()
 
 
+    # is implemented if one needs more than 3 flights to a destination.
+    # for the sake of abnormal recursion, it caters to less than 6 flights
     def More(self):
 
         for i in self.s_to:
@@ -225,6 +256,7 @@ class Main:
 
         return
 
+    # the optimising function for distance
     def Optimizer(self):
 
         if self.more :
@@ -269,7 +301,8 @@ class Main:
         return
 
 
-
+    # for writing into file for the different options or modes
+    # these modes are - 1) Direct flights 2) Two flights(inter) 3) Three flights(between) 4)More
     def Writing(self):
         with open(getcwd() + '/' + argv[-1][:-4:] + '_output.txt', 'w+') as sol:
             if self.direct_l:
@@ -472,15 +505,18 @@ class Main:
                 return sol.write("Unsupported request")
             return
 
+    # For writing into file if request is unsupported
     def Unsupported(self):
         with open(getcwd() + '/' + argv[-1][:-4:] + '_output.txt', 'w+') as sol:
             sol.write("Unsupported request")
 
         exit()
 
+    # Writing abstraction for wrinting a single line into a file
     def WriteLine(self, file, info):
         return file.write(info[0] + ' from ' + info[1] + ' to ' + info[2] + ' ' + info[3] + ' stops\n')
 
+    # Implements or combines all the methods into single method that can be called for results
     def Final(self):
         self.openFiles()
         self.inputCodes()
@@ -497,17 +533,20 @@ class Main:
         self.Writing()
         return
 
+
+    # getting the coordinates of the place when given the IATA code
     def coor(self, IATA):
         return float(self.airport[self.IATA_airport.index(IATA)][3]), float(self.airport[self.IATA_airport.index(IATA)][4])
 
 
-
+    # Using the Harversine to return the interger distance between 2 points. Radius of the earth is 6371km
     def Harversine_f(self, lat1, lon1,lat2, lon2):
         lon1, lat1, lon2, lat2 = radians(lon1), radians(lat1), radians(lon2), radians(lat2)
         d = int(2* 6371 * asin(sqrt(sin((lat2-lat1)/2)**2 + cos(lat1)*cos(lat2)*sin((lon2-lon1)/2)**2)))
 
         return d
 
+    # for getting the least distance form a source to a destination and storing the associated infomation for writing
     def comparator(self, keyword):
         if self.cum_distance<self.least_distance[0]:
             self.least_distance[0] = self.cum_distance
@@ -515,6 +554,7 @@ class Main:
 
         return
 
+    # Implementation of binary search for faster searches
     def BinarySearch(self, data, search):
         start = 0
         end = len(data) - 1
@@ -532,9 +572,10 @@ class Main:
 start = datetime.now()
 a = Main()
 
-
+# Function call
 a.Final()
 end = datetime.now()
 
+# Supposed runtime
 print(((start-end).microseconds)/1000000)
 
