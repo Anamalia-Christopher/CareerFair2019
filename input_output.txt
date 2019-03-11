@@ -1,7 +1,0 @@
-EK from ACC to DXB 0 stops
-EK from DXB to BNE 0 stops
-VA from BNE to EMD 0 stops
-Total flights: 3
-Total additional stops: 0
-Total distance: 18919km
-Optimality criteria: flights

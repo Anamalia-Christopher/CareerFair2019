@@ -2,7 +2,7 @@ import csv
 from os import  getcwd
 from sys import argv
 from datetime import datetime
-from math import asin, radians, cos, sqrt, sin
+from math import asin, radians, cos, sqrt, sin, ceil
 
 
 class Main:
@@ -15,7 +15,7 @@ class Main:
         self.to_dict = {}
         self.least_distance = [10000000000,0]
         self.cum_distance =0
-        self.more = False
+        self.more = 0
 
     def openFiles(self):
         cwd = getcwd()
@@ -93,8 +93,13 @@ class Main:
             return
         except ValueError:return
 
-    def dRFlight(self, source_set, destination_set):
 
+    def dRFlight(self, source_set, destination_set):
+        l=len(self.s_d)
+        quarter_length = ceil(l/4)
+        if 4*quarter_length>l:
+            for i in range(l,4*quarter_length ):
+                self.s_d.append(['something'])
         if len(source_set) >= len(destination_set):
 
             for source in source_set:
@@ -102,7 +107,11 @@ class Main:
                 for destination in destination_set:
 
                     try:
-                        i = self.s_d.index([source, destination])
+
+                        for n in range(4):
+
+                            i = self.s_d.index( [source, destination], n*quarter_length,(n+1)*quarter_length)
+                            break
 
                         cor1 = self.coor(source)
                         cor2 = self.coor(destination)
@@ -112,14 +121,17 @@ class Main:
                         self.between.append(self.routes[i])
 
                     except ValueError:pass
-            return
 
 
         elif len(source_set) <= len(destination_set):
             for destination in destination_set:
                 for source in source_set:
                     try:
-                        i = self.s_d.index([source, destination])
+
+                        for n in range(4):
+
+                            i = self.s_d.index( [source, destination], n*quarter_length,(n+1)*quarter_length)
+                            break
 
                         cor1 = self.coor(source)
                         cor2 = self.coor(destination)
@@ -128,9 +140,12 @@ class Main:
 
                         self.between.append(self.routes[i])
 
+                    except ValueError:pass
 
-                    except ValueError:return
 
+        if 4*quarter_length>l:
+            for i in range(l,4*quarter_length ):
+                self.s_d.pop()
 
         return
 
@@ -157,6 +172,7 @@ class Main:
 
 
                 self.to_dict[source][self.routes[i][2]] = self.routes[i]
+            # print(i)
             if self.s_d[i][1] == destination and self.s_d[i][0] in self.IATA_airport:
                 d_from.add(self.routes[i][1])
 
@@ -174,32 +190,38 @@ class Main:
         self.dRFlight(source_set=s_to, destination_set=d_from)
 
         del inter
+
         if self.between:
             return
 
+
         else:
-            self.more = True
+            self.more += 1
             self.s_to = s_to
             self.d_from = d_from
-            self.More()
-            return
+            return self.More()
+
 
     def More(self):
-        if len(self.s_to)>= len(self.d_from):
-            for i in self.s_to:
-                for j in self.d_from:
-                    if len(self.journey_to)>1 and len(self.journey_from)>1:
-                        self.journey_to.pop()
-                        self.journey_from.pop(0)
-                    self.routing(source=i, destination=j)
 
-        else:
-            for i in self.d_from:
-                for j in self.s_to:
-                    if len(self.journey_to)>1 and len(self.journey_from)>1:
-                        self.journey_to.pop()
-                        self.journey_from.pop(0)
-                    self.routing(source=j, destination=i)
+        for i in self.s_to:
+            for j in self.d_from:
+                if self.between or self.inter:
+                    return
+                print(self.journey_from[0])
+                print(self.to_dict[self.journey_from[0]])
+                if len(self.journey_to)>1 and len(self.journey_from)>1:
+                    self.journey_to.pop()
+                    self.journey_from.pop(0)
+                self.routing(source=i, destination=j)
+
+        # else:
+        #     for i in self.d_from:
+        #         for j in self.s_to:
+        #             if len(self.journey_to)>1 and len(self.journey_from)>1:
+        #                 self.journey_to.pop()
+        #                 self.journey_from.pop(0)
+        #             self.routing(source=j, destination=i)
 
         return
 
