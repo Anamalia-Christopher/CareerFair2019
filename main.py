@@ -309,7 +309,7 @@ class Main:
         with open(getcwd() + '/' + argv[-1][:-4:] + '_output.txt', 'w+') as sol:
             if self.direct_l:
 
-                self.WriteLine(file=sol, info=self.direct_l)
+                self.WriteLine(file=sol, info=self.direct_l, begin='1. ', end='.')
                 sol.write('Total flights: 1\n')
                 sol.write('Total additional stops: ' + str(self.direct_l[3]) + '\n')
                 sol.write('Total distance: ' + str(self.direct_l[4]) + 'km\n')
@@ -327,10 +327,10 @@ class Main:
                         before = self.to_dict[self.journey_to[-1]][i][1]
                         after = self.to_dict[self.journey_from[0]][i][2]
 
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i])
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i])
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before], begin='1. ', end='')
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i], begin='2. ', end='')
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i], begin='3. ', end='')
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after], begin='4. ', end='.')
 
                         stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
                                             int(self.to_dict[self.journey_to[-1]][i][3]) + \
@@ -354,10 +354,10 @@ class Main:
                     before = self.to_dict[self.journey_to[-1]][i][1]
                     after = self.to_dict[self.journey_from[0]][i][2]
 
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i])
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i])
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before], begin='1. ', end='')
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i], begin='2. ', end='')
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i], begin='3. ', end='')
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after], begin='4. ', end='.')
 
                     stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
                             int(self.to_dict[self.journey_to[-1]][i][3]) + \
@@ -379,13 +379,13 @@ class Main:
                         before = self.to_dict[self.journey_to[-1]][i[1]][1]
                         after = self.to_dict[self.journey_from[0]][i[2]][2]
 
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i[1]])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before], begin='1. ', end='')
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i[1]], begin='2. ', end='')
 
-                        self.WriteLine(file=sol, info=i)
+                        self.WriteLine(file=sol, info=i, begin='3. ', end='')
 
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i[2]])
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i[2]], begin='4. ', end='')
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after], begin='5. ', end='.')
 
                         stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
                                             int(self.to_dict[self.journey_to[-1]][i[1]][3]) + int(i[3]) + \
@@ -409,13 +409,13 @@ class Main:
                     before = self.to_dict[self.journey_to[-1]][i[1]][1]
                     after = self.to_dict[self.journey_from[0]][i[2]][2]
 
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i[1]])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before], begin='1. ', end='')
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i[1]], begin='2. ', end='')
 
-                    self.WriteLine(file=sol, info=i)
+                    self.WriteLine(file=sol, info=i, begin='3. ', end='')
 
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i[2]])
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i[2]], begin='4. ', end='')
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after], begin='5. ', end='.')
 
                     stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
                             int(self.to_dict[self.journey_to[-1]][i[1]][3]) + int(i[3]) + \
@@ -469,11 +469,11 @@ class Main:
 
                 if len(self.between)==1:
                     i=self.between[0]
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i[1]])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i[1]], begin='1. ', end='')
 
-                    self.WriteLine(file=sol, info=i)
+                    self.WriteLine(file=sol, info=i, begin='2. ', end='')
 
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i[2]])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i[2]], begin='3. ', end='.')
                     stops =int(self.to_dict[self.journey_to[0]][i[1]][3])+ int(i[3]) +int(self.to_dict[self.journey_from[-1]][i[2]][3])
 
                     self.cum_distance =self.to_dict[self.journey_to[0]][i[1]][4]+ i[4] + self.to_dict[self.journey_from[-1]][i[2]][4]
@@ -488,16 +488,16 @@ class Main:
 
                 i = self.least_distance[1]
 
-                self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i[1]])
+                self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i[1]], begin='1. ', end='')
 
-                self.WriteLine(file=sol, info=i)
+                self.WriteLine(file=sol, info=i, begin='2. ', end='')
 
-                self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i[2]])
+                self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i[2]], begin='3. ', end='.')
 
                 stops = int(self.to_dict[self.journey_to[0]][i[1]][3])+ int(i[3]) +int(self.to_dict[self.journey_from[-1]][i[2]][3])
 
 
-                sol.write('\nTotal flights: 3\n')
+                sol.write('Total flights: 3\n')
                 sol.write('Total additional stops: ' + str(stops) + '\n')
                 sol.write('Total distance: ' + str(self.least_distance[0]) + 'km\n')
                 sol.write('Optimality criteria: distance')
@@ -516,8 +516,8 @@ class Main:
         exit()
 
     # Writing abstraction for wrinting a single line into a file
-    def WriteLine(self, file, info):
-        return file.write(info[0] + ' from ' + info[1] + ' to ' + info[2] + ' ' + info[3] + ' stops\n')
+    def WriteLine(self, file, info, begin, end):
+        return file.write(begin+info[0] + ' from ' + info[1] + ' to ' + info[2] + ' ' + info[3] + ' stops'+end+'\n')
 
     # Implements or combines all the methods into single method that can be called for results
     def Final(self):
@@ -572,15 +572,4 @@ class Main:
                 start = middle + 1
             else:
                 return midpoint
-
-
-start = datetime.now()
-a = Main()
-
-# Function call
-a.Final()
-end = datetime.now()
-
-# Supposed runtime
-print(((start-end).microseconds)/1000000)
 
