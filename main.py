@@ -115,7 +115,6 @@ class Main:
             i = self.s_d.index([source, destination])
             self.routes[i].append(distance)
             self.direct_l = self.routes[i]
-            print(self.direct_l)
             return
         except ValueError:return
 
@@ -190,6 +189,7 @@ class Main:
 
         cor1 = self.coor(source)
         cor3 = self.coor(destination)
+        inter = set()
 
         for i in range(len(self.s_d)):
             if self.s_d[i][0] == source and self.s_d[i][1] in self.IATA_airport:
@@ -202,6 +202,7 @@ class Main:
 
                 self.to_dict[source][self.routes[i][2]] = self.routes[i]
 
+
             if self.s_d[i][1] == destination and self.s_d[i][0] in self.IATA_airport:
                 d_from.add(self.routes[i][1])
 
@@ -211,7 +212,9 @@ class Main:
 
                 self.to_dict[destination][self.routes[i][1]] = self.routes[i]
 
+
         inter = s_to.intersection(d_from)
+
         if inter:
             self.inter = inter
             return
@@ -241,7 +244,6 @@ class Main:
         for i in self.s_to:
             for j in self.d_from:
                 if self.between or self.inter:
-                    print('its finished')
                     return
 
                 if len(self.journey_to)>1 and len(self.journey_from)>1:
@@ -281,7 +283,6 @@ class Main:
                     self.comparator(i)
                 return
 
-            self.more = False
             return
 
         elif len(self.inter)>1:
@@ -328,17 +329,17 @@ class Main:
                         self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
                         self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i])
                         self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i])
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][after])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after])
 
                         stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
                                             int(self.to_dict[self.journey_to[-1]][i][3]) + \
                                             int(self.to_dict[self.journey_from[0]][i][3]) + \
-                                            int(self.to_dict[self.journey_to[-1]][after][3])
+                                            int(self.to_dict[self.journey_from[-1]][after][3])
 
                         self.cum_distance = self.cum_distance = self.to_dict[self.journey_to[0]][before][4] + \
                                             self.to_dict[self.journey_to[-1]][i][4] + \
                                             self.to_dict[self.journey_from[0]][i][4] + \
-                                            self.to_dict[self.journey_to[-1]][after][4]
+                                            self.to_dict[self.journey_from[-1]][after][4]
 
 
                         sol.write('Total flights: 4\n')
@@ -355,12 +356,12 @@ class Main:
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i])
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i])
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][after])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after])
 
                     stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
                             int(self.to_dict[self.journey_to[-1]][i][3]) + \
                             int(self.to_dict[self.journey_from[0]][i][3]) + \
-                            int(self.to_dict[self.journey_to[-1]][after][3])
+                            int(self.to_dict[self.journey_from[-1]][after][3])
 
                     sol.write('Total flights: 4\n')
                     sol.write('Total additional stops: ' + str(stops) + '\n')
@@ -434,6 +435,7 @@ class Main:
 
                 if len(self.inter) == 1:
                     i = list(self.inter)[0]
+
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i])
 
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i])
@@ -527,7 +529,7 @@ class Main:
             return
 
         self.routing(source=self.input_codes['source'], destination=self.input_codes['destination'])
-        if not(self.inter or self.between):
+        if not(self.inter) and not(self.between):
             self.More()
         self.Optimizer()
         self.Writing()
@@ -555,6 +557,8 @@ class Main:
         return
 
     # Implementation of binary search for faster searches
+    # at the end, this method was not use because inbuilt search algorithms proved the same worth
+
     def BinarySearch(self, data, search):
         start = 0
         end = len(data) - 1
