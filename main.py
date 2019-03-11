@@ -15,7 +15,7 @@ class Main:
         self.to_dict = {}
         self.least_distance = [10000000000,0]
         self.cum_distance =0
-        self.more = 0
+        self.more = False
 
     def openFiles(self):
         cwd = getcwd()
@@ -172,7 +172,7 @@ class Main:
 
 
                 self.to_dict[source][self.routes[i][2]] = self.routes[i]
-            # print(i)
+
             if self.s_d[i][1] == destination and self.s_d[i][0] in self.IATA_airport:
                 d_from.add(self.routes[i][1])
 
@@ -196,7 +196,10 @@ class Main:
 
 
         else:
-            self.more += 1
+
+            if self.more:
+                return
+            self.more = True
             self.s_to = s_to
             self.d_from = d_from
             return self.More()
@@ -207,21 +210,18 @@ class Main:
         for i in self.s_to:
             for j in self.d_from:
                 if self.between or self.inter:
+                    print('its finished')
                     return
-                print(self.journey_from[0])
-                print(self.to_dict[self.journey_from[0]])
+
                 if len(self.journey_to)>1 and len(self.journey_from)>1:
+                    del self.to_dict[self.journey_to[-1]]
+                    del self.to_dict[self.journey_from[0]]
+
                     self.journey_to.pop()
                     self.journey_from.pop(0)
+
                 self.routing(source=i, destination=j)
 
-        # else:
-        #     for i in self.d_from:
-        #         for j in self.s_to:
-        #             if len(self.journey_to)>1 and len(self.journey_from)>1:
-        #                 self.journey_to.pop()
-        #                 self.journey_from.pop(0)
-        #             self.routing(source=j, destination=i)
 
         return
 
@@ -237,6 +237,7 @@ class Main:
                                         self.to_dict[self.journey_from[0]][i][4] +self.to_dict[self.journey_to[-1]][after][4]
 
                     self.comparator(i)
+                return
 
             elif len(self.between) > 1:
                 for i in self.between:
@@ -246,6 +247,9 @@ class Main:
                                         self.to_dict[self.journey_from[0]][i[2]][4] + self.to_dict[self.journey_from[0]][after][4]
 
                     self.comparator(i)
+                return
+
+            self.more = False
             return
 
         elif len(self.inter)>1:

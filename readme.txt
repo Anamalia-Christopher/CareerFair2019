@@ -1,1 +1,2 @@
 To run this program, all one needs is a input file as specified in the instruction manual.
+In order to avoid needless recussions, the program determines the number of flights for at most 5 flights since that is realistic number for every individual who wants to fly. this is from this website.
