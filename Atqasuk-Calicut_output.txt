@@ -1,0 +1,9 @@
+7H from ATK to BRW 0 stops
+AS from BRW to ANC 0 stops
+AS from ANC to ORD 0 stops
+EY from ORD to AUH 0 stops
+IX from AUH to CCJ 0 stops
+Total flights: 5
+Total additional stops: 0
+Total distance: 20201km
+Optimality criteria: flights

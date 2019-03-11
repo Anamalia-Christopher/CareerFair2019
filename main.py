@@ -268,7 +268,7 @@ class Main:
                     before = self.to_dict[self.journey_to[-1]][i][1]
                     after = self.to_dict[self.journey_from[0]][i][2]
                     self.cum_distance = self.to_dict[self.journey_to[0]][before][4]+self.to_dict[self.journey_to[-1]][i][4] + \
-                                        self.to_dict[self.journey_from[0]][i][4] +self.to_dict[self.journey_to[-1]][after][4]
+                                        self.to_dict[self.journey_from[0]][i][4] +self.to_dict[self.journey_from[-1]][after][4]
 
                     self.comparator(i)
                 return
@@ -277,8 +277,9 @@ class Main:
                 for i in self.between:
                     before = self.to_dict[self.journey_to[-1]][i[1]][1]
                     after = self.to_dict[self.journey_from[0]][i[2]][2]
+
                     self.cum_distance = self.to_dict[self.journey_to[0]][before][4]+ self.to_dict[self.journey_to[-1]][i[1]][4] + i[4] + \
-                                        self.to_dict[self.journey_from[0]][i[2]][4] + self.to_dict[self.journey_from[0]][after][4]
+                                        self.to_dict[self.journey_from[0]][i[2]][4] + self.to_dict[self.journey_from[-1]][after][4]
 
                     self.comparator(i)
                 return
@@ -378,24 +379,23 @@ class Main:
                         before = self.to_dict[self.journey_to[-1]][i[1]][1]
                         after = self.to_dict[self.journey_from[0]][i[2]][2]
 
-
                         self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][before])
                         self.WriteLine(file=sol, info=self.to_dict[self.journey_to[-1]][i[1]])
 
                         self.WriteLine(file=sol, info=i)
 
                         self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i[2]])
-                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][after])
+                        self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after])
 
                         stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
                                             int(self.to_dict[self.journey_to[-1]][i[1]][3]) + int(i[3]) + \
                                             int(self.to_dict[self.journey_from[0]][i[2]][3]) + \
-                                            int(self.to_dict[self.journey_from[0]][after][3])
+                                            int(self.to_dict[self.journey_from[-1]][after][3])
 
                         self.cum_distance = self.to_dict[self.journey_to[0]][before][4] + \
                                             self.to_dict[self.journey_to[-1]][i[1]][4] + i[4] + \
                                             self.to_dict[self.journey_from[0]][i[2]][4] + \
-                                            self.to_dict[self.journey_from[0]][after][4]
+                                            self.to_dict[self.journey_from[-1]][after][4]
 
                         sol.write('Total flights: 5\n')
                         sol.write('Total additional stops: ' + str(stops) + '\n')
@@ -415,12 +415,12 @@ class Main:
                     self.WriteLine(file=sol, info=i)
 
                     self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][i[2]])
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[0]][after])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][after])
 
                     stops = int(self.to_dict[self.journey_to[0]][before][3]) + \
                             int(self.to_dict[self.journey_to[-1]][i[1]][3]) + int(i[3]) + \
                             int(self.to_dict[self.journey_from[0]][i[2]][3]) + \
-                            int(self.to_dict[self.journey_from[0]][after][3])
+                            int(self.to_dict[self.journey_from[-1]][after][3])
 
 
                     sol.write('Total flights: 5\n')
