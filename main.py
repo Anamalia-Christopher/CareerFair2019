@@ -497,10 +497,11 @@ class Main:
                 stops = int(self.to_dict[self.journey_to[0]][i[1]][3])+ int(i[3]) +int(self.to_dict[self.journey_from[-1]][i[2]][3])
 
 
-                sol.write('Total flights: 3\n')
+                sol.write('\nTotal flights: 3\n')
                 sol.write('Total additional stops: ' + str(stops) + '\n')
                 sol.write('Total distance: ' + str(self.least_distance[0]) + 'km\n')
                 sol.write('Optimality criteria: distance')
+
                 return
 
             else:
