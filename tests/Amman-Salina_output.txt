@@ -1,0 +1,7 @@
+1. US from AMM to ORD 0 stops
+2. AA from ORD to MCI 0 stops
+3. K5 from MCI to SLN 0 stops.
+Total flights: 3
+Total additional stops: 0
+Total distance: 10919km
+Optimality criteria: flights

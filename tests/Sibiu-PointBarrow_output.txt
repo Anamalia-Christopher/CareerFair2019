@@ -1,0 +1,8 @@
+1. RO from SBZ to VIE 0 stops
+2. UA from VIE to ORD 0 stops
+3. UA from ORD to ANC 0 stops
+4. KS from ANC to STG 0 stops.
+Total flights: 4
+Total additional stops: 0
+Total distance: 13994km
+Optimality criteria: flights

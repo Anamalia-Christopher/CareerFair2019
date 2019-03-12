@@ -1,0 +1,9 @@
+1. W3 from KAN to LOS 0 stops
+2. DL from LOS to ATL 0 stops
+3. AF from ATL to MEX 0 stops
+4. VW from MEX to PAZ 0 stops
+5. VW from PAZ to REX 0 stops.
+Total flights: 5
+Total additional stops: 0
+Total distance: 13190km
+Optimality criteria: flights

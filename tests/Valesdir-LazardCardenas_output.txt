@@ -1,0 +1,9 @@
+1. NF from VLS to VLI 0 stops
+2. IE from VLI to NAN 0 stops
+3. AA from NAN to LAX 0 stops
+4. Y4 from LAX to MEX 0 stops
+5. VW from MEX to LZC 0 stops.
+Total flights: 5
+Total additional stops: 0
+Total distance: 12825km
+Optimality criteria: flights

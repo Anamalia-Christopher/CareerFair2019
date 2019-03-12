@@ -1,0 +1,7 @@
+1. TP from HOR to LIS 0 stops
+2. AY from LIS to GVA 0 stops
+3. U2 from GVA to AJA 0 stops.
+Total flights: 3
+Total additional stops: 0
+Total distance: 3717km
+Optimality criteria: distance
