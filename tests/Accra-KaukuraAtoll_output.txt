@@ -1,9 +1,0 @@
-BA from ACC to LHR 0 stops
-VS from LHR to LAX 0 stops
-AA from LAX to PPT 0 stops
-VT from PPT to AXR 0 stops
-VT from AXR to KKR 0 stops
-Total flights: 5
-Total additional stops: 0
-Total distance: 20933km
-Optimality criteria: flights

@@ -1,0 +1,9 @@
+1. SD from KAN to KRT 0 stops
+2. SD from KRT to CAI 0 stops
+3. AF from CAI to CDG 0 stops
+4. AZ from CDG to MEX 0 stops
+5. AM from MEX to REX 0 stops.
+Total flights: 5
+Total additional stops: 0
+Total distance: 17385km
+Optimality criteria: flights

@@ -1,3 +1,6 @@
+#########---CHRISTOPHER ANAMALIA-------###########
+#########---EMMANUEL ANTWI ------------###########
+
 import csv
 from os import  getcwd
 from sys import argv
@@ -89,31 +92,99 @@ class Main:
     # Gets the IATA codes for the given location in the input.
     # Writes 'unsupported request' in file if it doesnt exist
     def inputCodes(self):
+        # initialising the dictionary that stores that IATA code of source and destination
         self.input_codes = {}
         try:
-            self.input_codes['source'] = self.IATA_airport[self.city.index(self.input[0][0])]
-            self.input_codes['destination'] = self.IATA_airport[self.city.index(self.input[1][0])]
+
+            # gets the index of the source and destination using list index attribute(builtin)
+            source_index = self.city.index(self.input[0][0])
+            destination_index = self.city.index(self.input[1][0])
+
+            self.input_codes['source'] = self.IATA_airport[source_index]
+            self.input_codes['destination'] = self.IATA_airport[destination_index]
+
+            # checks if the country corresponds with the index since city names repeat.
+            # If not uses a brute force search till it finds the right one
+            if self.airport[source_index][1] != self.input[0][1]:
+                l = len(self.airport)
+                quarter_length = ceil(l / 4)
+                if 4 * quarter_length > l:
+                    for i in range(l, 4 * quarter_length):
+                        self.airport.append(['fill', 'in'])
+
+                for i in range(quarter_length):
+                        if self.input[0][1] == self.airport[i][1] and self.input[0][0] == self.airport[i][0]:
+                            self.input_codes['source'] = self.airport[i][2]
+                            break
+
+                        if self.input[0][1] == self.airport[quarter_length + i][1] and self.input[0][0] == \
+                                self.airport[quarter_length + i][0]:
+                            self.input_codes['source'] = self.airport[quarter_length + i][2]
+                            break
+
+                        if self.input[0][1] == self.airport[2*quarter_length + i][1] and self.input[0][0] == \
+                                                        self.airport[2*quarter_length + i][0]:
+                            self.input_codes['source'] = self.airport[2*quarter_length + i][2]
+                            break
+
+                        if self.input[0][1] == self.airport[3*quarter_length + i][1] and self.input[0][0] == \
+                                                        self.airport[3*quarter_length + i][0]:
+                            self.input_codes['source'] = self.airport[3*quarter_length + i][2]
+                            break
+
+                if 4 * quarter_length > l:
+                    for i in range(l, 4 * quarter_length):
+                        self.airport.pop()
+            if self.airport[destination_index][1] != self.input[1][1]:
+                l = len(self.airport)
+                quarter_length = ceil(l / 4)
+                if 4 * quarter_length > l:
+                    for i in range(l, 4 * quarter_length):
+                        self.airport.append(['fill', 'in'])
+
+                for i in range(quarter_length):
+                    if self.input[1][1] == self.airport[i][1] and self.input[1][0] == self.airport[i][0]:
+                        self.input_codes['destination'] = self.airport[i][2]
+                        break
+
+                    if self.input[1][1] == self.airport[quarter_length+i][1] and self.input[1][0] == self.airport[quarter_length+i][0]:
+                        self.input_codes['destination'] = self.airport[quarter_length+i][2]
+                        break
+
+                    if self.input[1][1] == self.airport[2*quarter_length+i][1] and self.input[1][0] == self.airport[2*quarter_length+i][0]:
+                        self.input_codes['destination'] = self.airport[quarter_length+i][2]
+                        break
+
+                    if self.input[1][1] == self.airport[3*quarter_length+i][1] and self.input[1][0] == self.airport[3*quarter_length+i][0]:
+                        self.input_codes['destination'] = self.airport[3*quarter_length+i][2]
+                        break
+
+                if 4 * quarter_length > l:
+                    for i in range(l, 4 * quarter_length):
+                        self.airport.pop()
+
         except ValueError:
             self.Unsupported()
         del self.city
-
-        print(self.input_codes)
 
         return
 
     # Checks if there is a direct flight to the destination
     def directFlight(self, source, destination):
+        # initises the direct flight variable
         self.direct_l = []
-
+        # gets the coordinates of the source and destination for distance calculation
         cor1 = self.coor(source)
         cor2 = self.coor(destination)
 
-
+        # distance between source and destination
         distance = self.Harversine_f(lat1=cor1[0], lon1=cor1[1], lat2=cor2[0], lon2=cor2[1])
 
+        # using in-biult index for list, get the index of the source and destination
         try:
             i = self.s_d.index([source, destination])
             self.routes[i].append(distance)
+            # appends to list
             self.direct_l = self.routes[i]
             return
         except ValueError:return
@@ -121,11 +192,18 @@ class Main:
     # checks if the is a direct flight between any of the flights leaving source and flying to destination
     # it uses data from self.routing method
     def dRFlight(self, source_set, destination_set):
+        # length of the possible route list
         l=len(self.s_d)
+
+        # quarter length for 'divide and conquer algorithm '
         quarter_length = ceil(l/4)
+
+        # fills up the other parts with fill words to avoid index out of range error
         if 4*quarter_length>l:
             for i in range(l,4*quarter_length ):
-                self.s_d.append(['something'])
+                self.s_d.append(['fill'])
+
+        # optimal looping based on length of python sets
         if len(source_set) >= len(destination_set):
 
             for source in source_set:
@@ -133,7 +211,7 @@ class Main:
                 for destination in destination_set:
 
                     try:
-
+                        # checks if route for source and destination exits and stores it. distance is appended
                         for n in range(4):
 
                             i = self.s_d.index( [source, destination], n*quarter_length,(n+1)*quarter_length)
@@ -153,6 +231,7 @@ class Main:
             for destination in destination_set:
                 for source in source_set:
                     try:
+                        # checks if route for source and destination exits and stores it. distance is appended
 
                         for n in range(4):
 
@@ -168,7 +247,7 @@ class Main:
 
                     except ValueError:pass
 
-
+        # pops out the fill words to avoid future indexing errors
         if 4*quarter_length>l:
             for i in range(l,4*quarter_length ):
                 self.s_d.pop()
@@ -180,17 +259,23 @@ class Main:
     # it then implements self.dRFlight,  self.More and set intersection to find the right flight.
     def routing(self, source, destination):
 
+        # appends all sources and destination that use this function
         self.journey_to.append(source)
         self.journey_from.insert(0, destination)
+
+        # initilises a dict for source and destination
+
         self.to_dict.setdefault(source, {})
         self.to_dict.setdefault(destination, {})
+
+        # sets that stores all endpoints
         s_to = set()
         d_from = set()
-
+        # taking coordinates
         cor1 = self.coor(source)
         cor3 = self.coor(destination)
-        inter = set()
 
+        # loops though entire possible routes and adds route if exits to s_to, d_from and to the dictionary needed
         for i in range(len(self.s_d)):
             if self.s_d[i][0] == source and self.s_d[i][1] in self.IATA_airport:
 
@@ -212,25 +297,28 @@ class Main:
 
                 self.to_dict[destination][self.routes[i][1]] = self.routes[i]
 
-
+        # checks if there is an intersection
         inter = s_to.intersection(d_from)
 
+        # return if there is an intersection
         if inter:
             self.inter = inter
             return
-
+        # if not, checks if there is a betweener flight
         self.dRFlight(source_set=s_to, destination_set=d_from)
 
         del inter
 
+        # checks if there betweener flights
         if self.between:
             return
 
-
+        # if not, runs a function that checks for more number of flights
         else:
 
             if self.more:
                 return
+
             self.more = True
             self.s_to = s_to
             self.d_from = d_from
@@ -241,6 +329,9 @@ class Main:
     # for the sake of abnormal recursion, it caters to less than 6 flights
     def More(self):
 
+        # looks through the 2 sets self.s_to and self.d_from.
+        # Since its a set, the items are unordered hence one gets different results sometimes but the routes are always valid
+        # returns after is has something in either self.between or self.inter
         for i in self.s_to:
             for j in self.d_from:
                 if self.between or self.inter:
@@ -255,12 +346,12 @@ class Main:
 
                 self.routing(source=i, destination=j)
 
-
         return
 
     # the optimising function for distance
+    # if there are a number of options, this picks the one with the least distance
     def Optimizer(self):
-
+        # optimises for more than 3 flights needs to be taken
         if self.more :
 
             if len(self.inter) > 1:
@@ -285,7 +376,7 @@ class Main:
                 return
 
             return
-
+        # optimises for 2 flights
         elif len(self.inter)>1:
 
             for i in self.inter:
@@ -293,7 +384,7 @@ class Main:
                 self.cum_distance = self.to_dict[self.journey_to[0]][i][4] +self.to_dict[self.journey_from[-1]][i][4]
 
                 self.comparator(i)
-
+        # optimises for 3 flights
         elif len(self.between)>1:
             for i in self.between:
 
@@ -307,6 +398,7 @@ class Main:
     # these modes are - 1) Direct flights 2) Two flights(inter) 3) Three flights(between) 4)More
     def Writing(self):
         with open(getcwd() + '/' + argv[-1][:-4:] + '_output.txt', 'w+') as sol:
+
             if self.direct_l:
 
                 self.WriteLine(file=sol, info=self.direct_l, begin='1. ', end='.')
@@ -430,15 +522,20 @@ class Main:
 
                     return
 
+                else:
+                    # this is for just in case something happens that has not been catered for.
+                    return sol.write("Unsupported request")
+
+
 
             elif self.inter:
 
                 if len(self.inter) == 1:
                     i = list(self.inter)[0]
 
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i], begin='1. ', end='')
 
-                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i])
+                    self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i], begin='2. ', end='.')
                     stops = int(self.to_dict[self.journey_to[0]][i][3]) + int(self.to_dict[self.journey_from[-1]][i][3])
 
                     self.cum_distance = self.to_dict[self.journey_to[0]][i][4]+self.to_dict[self.journey_from[-1]][i][4]
@@ -452,9 +549,9 @@ class Main:
                     return
 
                 i=self.least_distance[1]
-                self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i])
+                self.WriteLine(file=sol, info=self.to_dict[self.journey_to[0]][i], begin='1. ', end='')
 
-                self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i])
+                self.WriteLine(file=sol, info=self.to_dict[self.journey_from[-1]][i], begin='2. ', end='.')
                 stops = int(self.to_dict[self.journey_to[0]][i][3]) + int(self.to_dict[self.journey_from[-1]][i][3])
 
                 sol.write('Total flights: 2\n')
@@ -505,6 +602,7 @@ class Main:
                 return
 
             else:
+                # this is for just in case something happens that has not been catered for.
                 return sol.write("Unsupported request")
             return
 
@@ -530,8 +628,7 @@ class Main:
             return
 
         self.routing(source=self.input_codes['source'], destination=self.input_codes['destination'])
-        if not(self.inter) and not(self.between):
-            self.More()
+
         self.Optimizer()
         self.Writing()
         return
@@ -559,6 +656,7 @@ class Main:
 
     # Implementation of binary search for faster searches
     # at the end, this method was not use because inbuilt search algorithms proved the same worth
+    # but then to use this method, the 'data' has to be sorted first
 
     def BinarySearch(self, data, search):
         start = 0

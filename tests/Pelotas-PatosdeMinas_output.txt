@@ -1,0 +1,9 @@
+1. JJ from PET to POA 0 stops
+2. O6 from POA to GRU 0 stops
+3. AD from GRU to PLU 0 stops
+4. AD from PLU to AAX 0 stops
+5. AD from AAX to POJ 0 stops.
+Total flights: 5
+Total additional stops: 0
+Total distance: 1988km
+Optimality criteria: flights
